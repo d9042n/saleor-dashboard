@@ -1,0 +1,16 @@
+version: "3.4"
+
+services:
+  dashboard:
+    image: saleor-dashboard
+    container_name: saleor-dashboard
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - 9000:80
+    restart: unless-stopped
+
+networks:
+  saleor-bridge-network:
+    driver: bridge
