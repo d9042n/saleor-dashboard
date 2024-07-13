@@ -1,5 +1,7 @@
 FROM node:18-alpine as builder
 RUN apk --no-cache add bash
+# RUN apk update && apk add git
+# RUN git init
 WORKDIR /app
 COPY package*.json ./
 ENV CI 1
