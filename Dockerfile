@@ -1,8 +1,8 @@
 FROM node:18-alpine as builder
 RUN apk --no-cache add bash
+WORKDIR /app
 RUN apk update && apk add git
 RUN git init
-WORKDIR /app
 COPY package*.json ./
 ENV CI 1
 RUN npm ci --legacy-peer-deps
@@ -45,11 +45,11 @@ COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY ./nginx/replace-api-url.sh /docker-entrypoint.d/50-replace-api-url.sh
 COPY --from=builder /app/build/ /app/
 
-#LABEL org.opencontainers.image.title="saleor/saleor-dashboard"                                  \
-#      org.opencontainers.image.description="A GraphQL-powered, single-page dashboard application for Saleor." \
-#      org.opencontainers.image.url="https://saleor.io/"                                \
-#      org.opencontainers.image.source="https://github.com/saleor/saleor-dashboard"     \
-#      org.opencontainers.image.revision="$COMMIT_ID"                                   \
-#      org.opencontainers.image.version="$PROJECT_VERSION"                              \
-#      org.opencontainers.image.authors="Saleor Commerce (https://saleor.io)"           \
-#      org.opencontainers.image.licenses="BSD 3"
+LABEL org.opencontainers.image.title="saleor/saleor-dashboard"                                  \
+      org.opencontainers.image.description="A GraphQL-powered, single-page dashboard application for Saleor." \
+      org.opencontainers.image.url="https://saleor.io/"                                \
+      org.opencontainers.image.source="https://github.com/saleor/saleor-dashboard"     \
+      org.opencontainers.image.revision="$COMMIT_ID"                                   \
+      org.opencontainers.image.version="$PROJECT_VERSION"                              \
+      org.opencontainers.image.authors="Saleor Commerce (https://saleor.io)"           \
+      org.opencontainers.image.licenses="BSD 3"
