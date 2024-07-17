@@ -1,8 +1,6 @@
 FROM node:18-alpine as builder
 RUN apk --no-cache add bash
 WORKDIR /app
-RUN apk update && apk add git
-RUN git init
 COPY package*.json ./
 ENV CI 1
 RUN npm ci --legacy-peer-deps
