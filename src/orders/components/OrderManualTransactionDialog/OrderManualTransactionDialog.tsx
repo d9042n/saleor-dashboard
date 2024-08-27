@@ -26,7 +26,7 @@ export const OrderManualTransactionDialog: React.FC<OrderManualTransactionDialog
   return (
     <OrderManualTransactionForm {...props}>
       <DashboardModal {...dialogProps}>
-        <DashboardModal.Content __width={"400px"}>
+        <DashboardModal.Content size="xs">
           <DashboardModal.Title display="flex" justifyContent="space-between" alignItems="center">
             <FormattedMessage {...manualTransactionMessages.dialogTitle} />
             <DashboardModal.Close onClose={onClose} />
@@ -48,7 +48,6 @@ export const OrderManualTransactionDialog: React.FC<OrderManualTransactionDialog
               <OrderManualTransactionForm.PriceInputField
                 label={intl.formatMessage(manualTransactionMessages.transactionAmount)}
               />
-              <OrderManualTransactionForm.ErrorText />
 
               <DashboardModal.Actions>
                 <BackButton onClick={onClose} />

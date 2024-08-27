@@ -1,17 +1,16 @@
 import ActionDialog from "@dashboard/components/ActionDialog";
 import { Combobox } from "@dashboard/components/Combobox";
 import { ConfirmButtonTransitionState } from "@dashboard/components/ConfirmButton";
-import { Choice } from "@dashboard/components/SingleSelectField";
 import useChoiceSearch from "@dashboard/hooks/useChoiceSearch";
 import useModalDialogOpen from "@dashboard/hooks/useModalDialogOpen";
-import useStateFromProps from "@dashboard/hooks/useStateFromProps";
-import React from "react";
+import { Option } from "@saleor/macaw-ui-next";
+import React, { useState } from "react";
 import { useIntl } from "react-intl";
 
 import { messages } from "./messages";
 
 export interface ChannelPickerDialogProps {
-  channelsChoices: Array<Choice<string, string>>;
+  channelsChoices: Option[];
   confirmButtonState: ConfirmButtonTransitionState;
   defaultChoice: string;
   open: boolean;
@@ -28,9 +27,7 @@ const ChannelPickerDialog: React.FC<ChannelPickerDialogProps> = ({
   onConfirm,
 }) => {
   const intl = useIntl();
-  const [choice, setChoice] = useStateFromProps(
-    defaultChoice || (channelsChoices.length ? channelsChoices[0].value : ""),
-  );
+  const [choice, setChoice] = useState("");
   const { result, search } = useChoiceSearch(channelsChoices);
 
   useModalDialogOpen(open, {
@@ -47,6 +44,7 @@ const ChannelPickerDialog: React.FC<ChannelPickerDialogProps> = ({
       onClose={onClose}
       onConfirm={() => onConfirm(choice)}
       title={intl.formatMessage(messages.selectChannel)}
+      size="xs"
     >
       <Combobox
         data-test-id="channel-autocomplete"

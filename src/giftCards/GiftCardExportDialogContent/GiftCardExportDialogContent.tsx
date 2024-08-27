@@ -1,4 +1,5 @@
 import { ConfirmButton } from "@dashboard/components/ConfirmButton";
+import { DashboardModal } from "@dashboard/components/Modal";
 import { Task } from "@dashboard/containers/BackgroundTasks/types";
 import { useExportGiftCardsMutation, useGiftCardTotalCountQuery } from "@dashboard/graphql";
 import useBackgroundTask from "@dashboard/hooks/useBackgroundTask";
@@ -11,7 +12,7 @@ import {
   exportSettingsInitialFormDataWithIds,
 } from "@dashboard/products/components/ProductExportDialog/types";
 import { DialogProps } from "@dashboard/types";
-import { DialogActions, DialogContent, DialogTitle, Typography } from "@material-ui/core";
+import { Text } from "@saleor/macaw-ui-next";
 import React from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 
@@ -97,34 +98,35 @@ const GiftCardExportDialog: React.FC<
   };
 
   return (
-    <>
-      <DialogTitle disableTypography>
+    <DashboardModal.Content size="sm">
+      <DashboardModal.Title>
         <FormattedMessage {...messages.title} />
-      </DialogTitle>
-      <DialogContent>
-        <ContentWithProgress>
-          {!loading && (
-            <>
-              <ExportDialogSettings
-                errors={exportGiftCardsOpts?.data?.exportGiftCards?.errors ?? []}
-                onChange={change}
-                selectedItems={selectedIds?.length}
-                data={data}
-                exportScopeLabels={exportScopeLabels}
-                allowScopeSelection={!hasIdsToExport}
-                itemsQuantity={{
-                  filter: filteredGiftCardsCount,
-                  all: allGiftCardsCount,
-                }}
-              />
-              <Typography className={classes.note} variant="body2">
-                {intl.formatMessage(messages.exportNote)}
-              </Typography>
-            </>
-          )}
-        </ContentWithProgress>
-      </DialogContent>
-      <DialogActions>
+      </DashboardModal.Title>
+
+      <ContentWithProgress>
+        {!loading && (
+          <>
+            <ExportDialogSettings
+              errors={exportGiftCardsOpts?.data?.exportGiftCards?.errors ?? []}
+              onChange={change}
+              selectedItems={selectedIds?.length}
+              data={data}
+              exportScopeLabels={exportScopeLabels}
+              allowScopeSelection={!hasIdsToExport}
+              itemsQuantity={{
+                filter: filteredGiftCardsCount,
+                all: allGiftCardsCount,
+              }}
+            />
+
+            <Text className={classes.note} fontSize={3}>
+              {intl.formatMessage(messages.exportNote)}
+            </Text>
+          </>
+        )}
+      </ContentWithProgress>
+
+      <DashboardModal.Actions>
         <ConfirmButton
           transitionState={exportGiftCardsOpts.status}
           variant="primary"
@@ -134,8 +136,8 @@ const GiftCardExportDialog: React.FC<
         >
           <FormattedMessage {...messages.confirmButtonLabel} />
         </ConfirmButton>
-      </DialogActions>
-    </>
+      </DashboardModal.Actions>
+    </DashboardModal.Content>
   );
 };
 

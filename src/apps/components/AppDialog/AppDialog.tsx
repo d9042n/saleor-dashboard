@@ -11,12 +11,17 @@ interface AppDialogProps {
 export const AppDialog: React.FC<AppDialogProps> = ({ children, title, onClose, ...props }) => {
   return (
     <DashboardModal aria-labelledby="extension app dialog" {...props} onChange={onClose}>
-      <DashboardModal.Content>
-        <DashboardModal.Title display="flex" justifyContent="space-between" alignItems="center">
+      <DashboardModal.Content size="lg">
+        <DashboardModal.Title
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          as="h2"
+        >
           {title}
           <DashboardModal.Close onClose={onClose}></DashboardModal.Close>
         </DashboardModal.Title>
-        <Box __width={600} __height={600}>
+        <Box width="100%" __height={600}>
           {children}
         </Box>
       </DashboardModal.Content>

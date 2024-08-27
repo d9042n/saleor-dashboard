@@ -4,6 +4,7 @@ import { useChannelsSearch } from "@dashboard/components/ChannelsAvailabilityDia
 import { Combobox } from "@dashboard/components/Combobox";
 import ControlledCheckbox from "@dashboard/components/ControlledCheckbox";
 import { IMessage } from "@dashboard/components/messages";
+import { useGiftCardPermissions } from "@dashboard/giftCards/hooks/useGiftCardPermissions";
 import { useChannelsQuery, useGiftCardResendMutation } from "@dashboard/graphql";
 import useForm from "@dashboard/hooks/useForm";
 import useNotifier from "@dashboard/hooks/useNotifier";
@@ -11,8 +12,8 @@ import { getBySlug } from "@dashboard/misc";
 import { DialogProps } from "@dashboard/types";
 import commonErrorMessages from "@dashboard/utils/errors/common";
 import { mapSlugNodeToChoice } from "@dashboard/utils/maps";
-import { CircularProgress, TextField, Typography } from "@material-ui/core";
-import { Box } from "@saleor/macaw-ui-next";
+import { CircularProgress, TextField } from "@material-ui/core";
+import { Box, Text } from "@saleor/macaw-ui-next";
 import React, { useEffect, useState } from "react";
 import { useIntl } from "react-intl";
 
@@ -36,8 +37,11 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
   const {
     giftCard: { boughtInChannel: initialChannelSlug },
   } = useGiftCardDetails();
+  const { canManageChannels } = useGiftCardPermissions();
   const [consentSelected, setConsentSelected] = useState(false);
-  const { data: channelsData, loading: loadingChannels } = useChannelsQuery({});
+  const { data: channelsData, loading: loadingChannels } = useChannelsQuery({
+    skip: !canManageChannels,
+  });
   const channels = channelsData?.channels;
   const activeChannels = channels?.filter(({ isActive }) => isActive);
   const { onQueryChange, filteredChannels } = useChannelsSearch(activeChannels);
@@ -102,7 +106,6 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
       title={intl.formatMessage(messages.title)}
       confirmButtonState={status}
       disabled={loading}
-      size="lg"
     >
       {loadingChannels ? (
         <div className={progressClasses.progressContainer}>
@@ -110,7 +113,7 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
         </div>
       ) : (
         <Box display="grid" gap={2}>
-          <Typography>{intl.formatMessage(messages.description)}</Typography>
+          <Text>{intl.formatMessage(messages.description)}</Text>
 
           <Combobox
             label={intl.formatMessage(messages.sendToChannelSelectLabel)}
@@ -118,7 +121,7 @@ const GiftCardResendCodeDialog: React.FC<DialogProps> = ({ open, onClose }) => {
             fetchOptions={onQueryChange}
             name="channelSlug"
             value={{
-              label: channels.find(getBySlug(data?.channelSlug))?.name,
+              label: channels?.find(getBySlug(data?.channelSlug))?.name,
               value: data?.channelSlug,
             }}
             onChange={change}
