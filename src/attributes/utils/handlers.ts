@@ -29,10 +29,10 @@ import { getFileValuesToUploadFromAttributes, isFileValueUnused } from "./data";
 export function createAttributeChangeHandler(
   changeAttributeData: FormsetChange<string[]>,
   triggerChange: () => void,
-): FormsetChange<string> {
-  return (attributeId: string, value: string) => {
+): FormsetChange<string | null | undefined> {
+  return (attributeId: string, value: string | null | undefined) => {
     triggerChange();
-    changeAttributeData(attributeId, value === "" ? [] : [value]);
+    changeAttributeData(attributeId, !value ? [] : [value]);
   };
 }
 
@@ -206,7 +206,7 @@ function getFileInput(attribute: AttributeInput, updatedFileAttributes: Attribut
 function getBooleanInput(attribute: AttributeInput) {
   return {
     id: attribute.id,
-    boolean: attribute.value[0] ? JSON.parse(attribute.value[0]) : null,
+    boolean: attribute.value[0] != null ? JSON.parse(attribute.value[0]) : null,
   };
 }
 

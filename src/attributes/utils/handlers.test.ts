@@ -1,4 +1,5 @@
 import {
+  createAttributeChangeHandler,
   createAttributeMultiChangeHandler,
   prepareAttributesInput,
 } from "@dashboard/attributes/utils/handlers";
@@ -155,12 +156,20 @@ const createReferenceAttribute = (value: string, isRequired?: boolean) =>
     value,
     isRequired,
   });
-const createBooleanAttribute = (value: string, isRequired?: boolean) =>
-  createAttribute({
+const createBooleanAttribute = (value: string, isRequired = false) => ({
+  data: {
+    entityType: undefined,
     inputType: AttributeInputTypeEnum.BOOLEAN,
-    value,
     isRequired,
-  });
+    // those values don't matter
+    selectedValues: [],
+    values: [],
+    unit: null,
+  },
+  id: ATTR_ID,
+  label: "MyAttribute",
+  value: [value],
+});
 const createPlainTextAttribute = (value: string, isRequired?: boolean) =>
   createAttribute({ inputType: AttributeInputTypeEnum.PLAIN_TEXT, value, isRequired });
 const createRichTextAttribute = (value: string, isRequired?: boolean) =>
@@ -215,6 +224,7 @@ describe("Multiple select change handler", () => {
     expect(trigger).toHaveBeenCalledTimes(1);
   });
 });
+
 describe("Sending only changed attributes", () => {
   // null in expected = attribute not present in output
   describe("works with reference attributes", () => {
@@ -303,23 +313,24 @@ describe("Sending only changed attributes", () => {
 
   describe("works with boolean attributes", () => {
     test.each`
-      newAttr    | oldAttr  | expected
-      ${null}    | ${null}  | ${null}
-      ${"true"}  | ${true}  | ${null}
-      ${"true"}  | ${false} | ${true}
-      ${"true"}  | ${null}  | ${true}
-      ${"false"} | ${false} | ${null}
-      ${"false"} | ${true}  | ${false}
-      ${"false"} | ${null}  | ${false}
+      newAttr  | oldAttr  | expected
+      ${null}  | ${null}  | ${"empty"}
+      ${true}  | ${true}  | ${"empty"}
+      ${true}  | ${false} | ${true}
+      ${true}  | ${null}  | ${true}
+      ${false} | ${false} | ${"empty"}
+      ${false} | ${true}  | ${false}
+      ${false} | ${null}  | ${false}
     `("$oldAttr -> $newAttr returns $expected", ({ newAttr, oldAttr, expected }) => {
       const attribute = createBooleanAttribute(newAttr);
       const prevAttribute = createBooleanAttribute(oldAttr);
       const result = prepareAttributesInput({
         attributes: [attribute],
-        prevAttributes: [prevAttribute],
+        prevAttributes: typeof prevAttribute === "undefined" ? [] : [prevAttribute],
         updatedFileAttributes: [],
       });
-      const expectedResult = expected !== null ? [{ id: ATTR_ID, boolean: expected }] : [];
+
+      const expectedResult = expected !== "empty" ? [{ id: ATTR_ID, boolean: expected }] : [];
 
       expect(result).toEqual(expectedResult);
     });
@@ -327,14 +338,14 @@ describe("Sending only changed attributes", () => {
 
   describe("works with required boolean attributes", () => {
     test.each`
-      newAttr    | oldAttr  | expected
-      ${null}    | ${null}  | ${null}
-      ${"true"}  | ${true}  | ${true}
-      ${"true"}  | ${false} | ${true}
-      ${"true"}  | ${null}  | ${true}
-      ${"false"} | ${false} | ${false}
-      ${"false"} | ${true}  | ${false}
-      ${"false"} | ${null}  | ${false}
+      newAttr  | oldAttr  | expected
+      ${null}  | ${null}  | ${null}
+      ${true}  | ${true}  | ${true}
+      ${true}  | ${false} | ${true}
+      ${true}  | ${null}  | ${true}
+      ${false} | ${false} | ${false}
+      ${false} | ${true}  | ${false}
+      ${false} | ${null}  | ${false}
     `("$oldAttr -> $newAttr returns $expected", ({ newAttr, oldAttr, expected }) => {
       const attribute = createBooleanAttribute(newAttr, true);
       const prevAttribute = createBooleanAttribute(oldAttr, true);
@@ -736,5 +747,52 @@ describe("Sending only changed attributes", () => {
         },
       ]);
     });
+  });
+});
+
+describe("createAttributeChangeHandler", () => {
+  it("should return empty array when value is empty string", () => {
+    // Arrange
+    const change = jest.fn();
+    const trigger = jest.fn();
+    const handler = createAttributeChangeHandler(change, trigger);
+
+    // Act
+    handler("attr-1", "");
+
+    // Assert
+    expect(change).toHaveBeenCalledTimes(1);
+    expect(change).toHaveBeenCalledWith("attr-1", []);
+    expect(trigger).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return empty array when value is null", () => {
+    // Arrange
+    const change = jest.fn();
+    const trigger = jest.fn();
+    const handler = createAttributeChangeHandler(change, trigger);
+
+    // Act
+    handler("attr-1", null);
+
+    // Assert
+    expect(change).toHaveBeenCalledTimes(1);
+    expect(change).toHaveBeenCalledWith("attr-1", []);
+    expect(trigger).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return array with value when value not null or undefined or empty string", () => {
+    // Arrange
+    const change = jest.fn();
+    const trigger = jest.fn();
+    const handler = createAttributeChangeHandler(change, trigger);
+
+    // Act
+    handler("attr-1", "val-1");
+
+    // Assert
+    expect(change).toHaveBeenCalledTimes(1);
+    expect(change).toHaveBeenCalledWith("attr-1", ["val-1"]);
+    expect(trigger).toHaveBeenCalledTimes(1);
   });
 });

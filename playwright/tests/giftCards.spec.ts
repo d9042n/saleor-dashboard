@@ -17,8 +17,10 @@ test.beforeEach(async ({ page, request }) => {
 });
 test("TC: SALEOR_105 Issue gift card @e2e @gift", async () => {
   await giftCardsPage.clickIssueCardButton();
+  await expect(giftCardsPage.issueGiftCardDialog.amountDropdown).toBeVisible();
   await giftCardsPage.issueGiftCardDialog.typeAmount("50");
   await giftCardsPage.issueGiftCardDialog.typeCustomTag("super ultra automation discount");
+  await giftCardsPage.issueGiftCardDialog.tagsInputBlur();
   await giftCardsPage.issueGiftCardDialog.clickRequiresActivationCheckbox();
   await giftCardsPage.issueGiftCardDialog.clickIssueButton();
   await expect(giftCardsPage.issueGiftCardDialog.cardCode).toBeVisible();
@@ -68,6 +70,9 @@ test("TC: SALEOR_106 Issue gift card with specific customer and expiry date @e2e
 test("TC: SALEOR_107 Resend code @e2e @gift", async () => {
   await giftCardsPage.clickListRowBasedOnContainingText(GIFT_CARDS.giftCardToResendCode.name);
   await giftCardsPage.clickResendCodeButton();
+  // This is a workaround for the issue with the dropdown focusing on dialog open
+  // Dropdown can cover the resend button and cause test to fail
+  await giftCardsPage.resendGiftCardCodeDialog.blur();
   await giftCardsPage.resendGiftCardCodeDialog.clickResendButton();
   await giftCardsPage.expectSuccessBanner();
 });
