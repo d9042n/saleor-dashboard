@@ -4,6 +4,7 @@ import TableCellHeader from "@dashboard/components/TableCellHeader";
 import { TablePaginationWithContext } from "@dashboard/components/TablePagination";
 import TableRowLink from "@dashboard/components/TableRowLink";
 import { WarehouseWithShippingFragment } from "@dashboard/graphql";
+import { getPrevLocationState } from "@dashboard/hooks/useBackLinkWithState";
 import { renderCollection, stopPropagation } from "@dashboard/misc";
 import { ListProps, SortPage } from "@dashboard/types";
 import { mapEdgesToItems } from "@dashboard/utils/maps";
@@ -15,6 +16,7 @@ import { DeleteIcon, IconButton, makeStyles } from "@saleor/macaw-ui";
 import { Skeleton } from "@saleor/macaw-ui-next";
 import React from "react";
 import { FormattedMessage } from "react-intl";
+import { useLocation } from "react-router";
 
 const useStyles = makeStyles(
   theme => ({
@@ -62,6 +64,7 @@ const numberOfColumns = 3;
 const WarehouseList: React.FC<WarehouseListProps> = props => {
   const { warehouses, disabled, settings, sort, onUpdateListSettings, onRemove, onSort } = props;
   const classes = useStyles(props);
+  const location = useLocation();
 
   return (
     <ResponsiveTable data-test-id="warehouse-list">
@@ -102,7 +105,14 @@ const WarehouseList: React.FC<WarehouseListProps> = props => {
           warehouses,
           warehouse => (
             <TableRowLink
-              href={warehouse && warehouseUrl(warehouse.id)}
+              href={
+                warehouse
+                  ? {
+                      pathname: warehouseUrl(warehouse.id),
+                      state: getPrevLocationState(location),
+                    }
+                  : undefined
+              }
               className={classes.tableRow}
               hover={!!warehouse}
               key={warehouse ? warehouse.id : "skeleton"}

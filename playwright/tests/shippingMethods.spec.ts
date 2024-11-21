@@ -1,9 +1,10 @@
 import { CHANNELS, SHIPPING_METHODS, WAREHOUSES } from "@data/e2eTestData";
 import { ShippingMethodsPage } from "@pages/shippingMethodsPage";
 import { ShippingRatesPage } from "@pages/shippingRatesPage";
-import { expect, test } from "@playwright/test";
+import { expect } from "@playwright/test";
+import { test } from "utils/testWithPermission";
 
-test.use({ storageState: "./playwright/.auth/admin.json" });
+test.use({ permissionName: "admin" });
 
 let shippingMethodsPage: ShippingMethodsPage;
 let shippingRatesPage: ShippingRatesPage;
@@ -44,9 +45,9 @@ test("TC: SALEOR_32 Add price rate to shipping method - with excluded zip codes 
   await shippingRatesPage.typePrice();
   await shippingRatesPage.addPostalCodeRange();
   await shippingRatesPage.clickSaveButton();
-  await shippingRatesPage.basePage.expectSuccessBanner();
+  await shippingRatesPage.expectSuccessBanner();
   await shippingRatesPage.addExcludedProduct("Bean Juice");
-  await shippingRatesPage.basePage.expectSuccessBanner();
+  await shippingRatesPage.expectSuccessBanner();
   await shippingRatesPage.excludedProductsRows.waitFor({ state: "visible" });
   await expect(shippingRatesPage.excludedProductsRows).toContainText("Bean Juice");
   await expect(await shippingRatesPage.assignedPostalCodesRows.count()).toEqual(1);
@@ -67,9 +68,9 @@ test("TC: SALEOR_33 Add weight rate to shipping method - with included zip codes
   await shippingRatesPage.clickIncludePostalCodesRadioButton();
   await shippingRatesPage.addPostalCodeRange();
   await shippingRatesPage.clickSaveButton();
-  await shippingRatesPage.basePage.expectSuccessBanner();
+  await shippingRatesPage.expectSuccessBanner();
   await shippingRatesPage.addExcludedProduct("Bean Juice");
-  await shippingRatesPage.basePage.expectSuccessBanner();
+  await shippingRatesPage.expectSuccessBanner();
   await shippingRatesPage.excludedProductsRows.waitFor({ state: "visible" });
   await expect(shippingRatesPage.excludedProductsRows).toContainText("Bean Juice");
 });
@@ -123,9 +124,10 @@ test("TC: SALEOR_36 Delete shipping zones in bulk @shipping-method @e2e", async 
 });
 test("TC: SALEOR_37 Update a shipping method @shipping-method @e2e", async () => {
   const channelSection = shippingMethodsPage.rightSideDetailsPage.channelSection;
-  const warehouseSection = shippingMethodsPage.rightSideDetailsPage.warehouseSection;
   const alreadyAssignedChannels = [CHANNELS.channelUSD.name];
   const channelsToBeAssigned = [CHANNELS.channelPLN.name];
+
+  const warehouseSection = shippingMethodsPage.rightSideDetailsPage.warehouseSection;
   const alreadyAssignedWarehouses = [
     WAREHOUSES.warehouseOceania.name,
     WAREHOUSES.warehouseAfrica.name,
@@ -146,27 +148,26 @@ test("TC: SALEOR_37 Update a shipping method @shipping-method @e2e", async () =>
   );
   await shippingMethodsPage.rightSideDetailsPage.clickChannelsSelectShippingPage();
   await shippingMethodsPage.rightSideDetailsPage.selectSingleChannelShippingPage();
+
   await shippingMethodsPage.rightSideDetailsPage.expectOptionsSelected(
     warehouseSection,
     alreadyAssignedWarehouses,
   );
-
   await shippingMethodsPage.rightSideDetailsPage.clickWarehouseSelectShippingPage();
   await shippingMethodsPage.rightSideDetailsPage.typeAndSelectMultipleWarehousesShippingPage(
     warehousesToBeAssigned,
   );
+
   await shippingMethodsPage.saveShippingZone();
   await shippingMethodsPage.expectSuccessBanner();
 
-  const updatedChannelsList = alreadyAssignedChannels.concat(channelsToBeAssigned);
+  const updatedChannelsList = [...alreadyAssignedChannels, ...channelsToBeAssigned];
+  const updatedWarehousesList = [...alreadyAssignedWarehouses, ...warehousesToBeAssigned];
 
   await shippingMethodsPage.rightSideDetailsPage.expectOptionsSelected(
     channelSection,
     updatedChannelsList,
   );
-
-  const updatedWarehousesList = alreadyAssignedWarehouses.concat(warehousesToBeAssigned);
-
   await shippingMethodsPage.rightSideDetailsPage.expectOptionsSelected(
     warehouseSection,
     updatedWarehousesList,

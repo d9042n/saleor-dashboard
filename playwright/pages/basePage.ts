@@ -2,6 +2,8 @@ import { LOCATORS } from "@data/commonLocators";
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
+import { SUCCESS_BANNER_TIMEOUT } from "../../playwright.config";
+
 export class BasePage {
   readonly page: Page;
 
@@ -18,7 +20,7 @@ export class BasePage {
     readonly errorBanner = page.locator(LOCATORS.errorBanner),
     readonly saveButton = page.locator(LOCATORS.saveButton),
     readonly infoBanner = page.locator(LOCATORS.infoBanner),
-    readonly loader = page.locator(LOCATORS.loader),
+    readonly dataGridLoader = page.locator(LOCATORS.dataGridLoader),
     readonly previousPagePaginationButton = page.getByTestId("button-pagination-back"),
     readonly rowNumberButton = page.getByTestId("PaginationRowNumberSelect"),
     readonly rowNumberOption = page.getByTestId("rowNumberOption"),
@@ -109,8 +111,11 @@ export class BasePage {
     await this.errorBanner.locator(`text=${msg}`).waitFor({ state: "visible", timeout: 10000 });
   }
 
-  async expectSuccessBanner() {
-    await this.successBanner.first().waitFor({ state: "visible", timeout: 15000 });
+  async expectSuccessBanner(timeout = SUCCESS_BANNER_TIMEOUT) {
+    await this.successBanner.first().waitFor({
+      state: "visible",
+      timeout,
+    });
     await expect(this.errorBanner, "No error banner should be visible").not.toBeVisible();
   }
 
@@ -313,7 +318,6 @@ export class BasePage {
 
   async waitForDOMToFullyLoad() {
     await this.page.waitForLoadState("domcontentloaded", { timeout: 70000 });
-    await this.loader.waitFor({ state: "hidden" });
   }
 
   async expectElementIsHidden(locator: Locator) {
@@ -326,5 +330,9 @@ export class BasePage {
 
   async waitForCanvasContainsText(text: string) {
     await this.gridCanvas.getByText(text).waitFor({ state: "attached", timeout: 50000 });
+  }
+
+  async waitForDatagridLoaderToDisappear() {
+    await this.dataGridLoader.waitFor({ state: "hidden" });
   }
 }
